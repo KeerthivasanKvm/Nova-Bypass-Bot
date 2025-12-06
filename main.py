@@ -22,6 +22,11 @@ from pyrogram import Client, filters
 from db import Database
 import time
 
+# Bot configuration
+with open("config.json", "r") as f:
+    DATA: dict = load(f)
+
+
 # Helper to parse time (e.g., "1d", "1h")
 def parse_duration(time_str):
     unit = time_str[-1]
@@ -59,9 +64,64 @@ async def redeem_access(client, message):
 # Initialize URL extractor
 extractor = URLExtract()
 
-# Bot configuration
-with open("config.json", "r") as f:
-    DATA: dict = load(f)
+@app.on_message(filters.text)
+async def handle_link(client, message):
+    user_id = message.from_user.id
+    url = message.text.strip()
+
+    # 1. Ensure user exists in DB
+    await db.add_user(user_id)
+    user = await db.get_user(user_id)
+
+    # 2. Check Premium Status & Expiry
+    is_premium = user['is_premium']
+    if is_premium and user['premium_expiry']:
+        if datetime.datetime.now() > user['premium_expiry']:
+            is_premium = False # Expired
+            # You might want to update DB here to set is_premium=False
+
+    # 3. Check Limits for Free Users
+    if not is_premium:
+        if user['daily_usage'] >= FREE_LIMIT:
+            await message.reply_text(
+                "❌ **Daily Limit Reached**\n\n"
+                "You have used your free bypasses for today.\n"
+                "Buy a Premium Token or use a Reset Key to continue.\n"
+                "Use `/redeem <token>`"
+            )
+            return
+
+    # 4. Check Cache (Optimization)
+    cached_link = await db.check_link_cache(url)
+    if cached_link:
+        await message.reply_text(f"✅ Cached Result: {cached_link}")
+        return
+
+    # 5. Domain Blocking/Allowing (Admin restriction)
+    # Fetch banned domains from DB (you need to implement the settings collection)
+    settings = await db.settings.find_one({'_id': 'main_settings'})
+    if settings and any(banned in url for banned in settings.get('banned_domains', [])):
+        await message.reply_text("❌ This website is restricted by Admin.")
+        return
+
+    # 6. Proceed to Bypass (Cloudflare compatible)
+    msg = await message.reply_text("🔎 Bypassing...")
+    try:
+        # CALL YOUR BYPASSER FUNCTION HERE
+        result_link = bypasser_logic(url) 
+        
+        if result_link:
+            # Save to Cache
+            await db.save_link(url, result_link)
+            # Increment Usage
+            await db.update_usage(user_id)
+            
+            await msg.edit_text(f"✅ Bypassed: {result_link}")
+        else:
+            await msg.edit_text("❌ Failed to bypass.")
+            
+    except Exception as e:
+        await msg.edit_text(f"Error: {e}")
 
 def getenv(var):
     return environ.get(var) or DATA.get(var, None)
@@ -337,5 +397,6 @@ def docfile(client: Client, message: Message):
 # Start the bot
 print("Bot Starting")
 app.run()
+
 
 
