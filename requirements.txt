@@ -14,4 +14,12 @@ motor  # Async MongoDB driver (essential for Telegram bots)
 dnspython
 cloudscraper # For Cloudflare
 pyaes
+pyrogram
+tgcrypto
+motor
+dnspython
+cloudscraper
+requests
+beautifulsoup4
+
 
