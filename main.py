@@ -17,6 +17,45 @@ import freewall
 from time import time
 from db import DB
 
+# In main.py
+from pyrogram import Client, filters
+from db import Database
+import time
+
+# Helper to parse time (e.g., "1d", "1h")
+def parse_duration(time_str):
+    unit = time_str[-1]
+    value = int(time_str[:-1])
+    if unit == 'h': return value * 3600
+    if unit == 'd': return value * 86400
+    if unit == 'm': return value * 2592000 # 30 days
+    return 0
+
+ADMIN_ID = 12345678  # Replace with your ID
+FREE_LIMIT = 5 # How many links free users can do
+
+@app.on_message(filters.command("generate") & filters.user(ADMIN_ID))
+async def generate_access(client, message):
+    # Usage: /generate 1d premium  OR /generate 0 reset
+    try:
+        args = message.command
+        duration_str = args[1]
+        token_type = args[2] if len(args) > 2 else "premium"
+        
+        seconds = parse_duration(duration_str) if token_type == "premium" else 0
+        
+        token = await db.generate_token(seconds, type=token_type)
+        await message.reply_text(f"Generated Token:\n`{token}`\nType: {token_type}\nDuration: {duration_str}")
+    except Exception as e:
+        await message.reply_text("Usage: /generate 1d premium OR /generate 1 reset")
+
+@app.on_message(filters.command("redeem"))
+async def redeem_access(client, message):
+    token = message.command[1]
+    success, msg = await db.redeem_token(message.from_user.id, token)
+    await message.reply_text(msg)
+
+
 # Initialize URL extractor
 extractor = URLExtract()
 
@@ -298,3 +337,4 @@ def docfile(client: Client, message: Message):
 # Start the bot
 print("Bot Starting")
 app.run()
+
