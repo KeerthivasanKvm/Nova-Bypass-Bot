@@ -2,6 +2,7 @@
     "TOKEN": "",
     "ID": "",
     "HASH": "",
+    "ADMIN_IDS" : "",
     "Laravel_Session": "",
     "XSRF_TOKEN": "",
     "GDTot_Crypt": "",
