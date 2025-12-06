@@ -2782,6 +2782,22 @@ def shortners(url):
         print("entered gdrive look alike: ", url)
         return unified(url)
 
+# Create a scraper instance
+scraper = cloudscraper.create_scraper(browser='chrome')
+
+def unified_request(url):
+    try:
+        # This automatically handles most Cloudflare JS challenges
+        response = scraper.get(url, allow_redirects=True)
+        return response
+    except Exception as e:
+        print(f"Error accessing {url}: {e}")
+        return None
+
+# Now, inside your bypass logic functions (e.g., bypass_adfly), 
+# replace requests.get(url) with unified_request(url)
+     
+
     # others
     elif ispresent(otherslist, url):
         print("entered others: ", url)
@@ -2794,3 +2810,4 @@ def shortners(url):
 
 
 ################################################################################################################################
+
