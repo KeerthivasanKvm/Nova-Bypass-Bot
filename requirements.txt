@@ -1,5 +1,4 @@
 requests
-cloudscraper
 bs4 
 python-dotenv
 kurigram==2.2.0
@@ -11,3 +10,8 @@ flask
 gunicorn
 curl-cffi
 urlextract
+motor  # Async MongoDB driver (essential for Telegram bots)
+dnspython
+cloudscraper # For Cloudflare
+pyaes
+
