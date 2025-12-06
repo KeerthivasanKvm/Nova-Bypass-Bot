@@ -1,3 +1,16 @@
+import os
+
+# Database
+MONGO_URI = os.environ.get("MONGO_URI", "your_mongodb_connection_string")
+DB_NAME = "LinkBypassBot"
+
+# Admin & Permissions
+FORCE_SUB_CHANNEL = os.environ.get("FORCE_SUB_CHANNEL", "-1001234567890") # ID of your channel
+AUTH_GROUP_ONLY = True # If True, bot ignores PMs unless whitelisted
+
+# Limits
+FREE_LIMIT = 6
+
 {
     "TOKEN": "",
     "ID": "",
@@ -14,7 +27,5 @@
     "TERA_COOKIE": "",
     "CLOUDFLARE": "",
     "PORT": 5000,
-    "DB_API": "",
-    "DB_OWNER": "bipinkrish",
-    "DB_NAME": "link_bypass.db"
+    
 }
