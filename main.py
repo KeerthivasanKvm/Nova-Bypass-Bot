@@ -31,8 +31,8 @@ def parse_duration(time_str):
     if unit == 'm': return value * 2592000 # 30 days
     return 0
 
-ADMIN_ID = 12345678  # Replace with your ID
-FREE_LIMIT = 5 # How many links free users can do
+ADMIN_ID = getenv("ADMIN_IDS")  # Replace with your ID
+FREE_LIMIT = 6 # How many links free users can do
 
 @app.on_message(filters.command("generate") & filters.user(ADMIN_ID))
 async def generate_access(client, message):
@@ -337,4 +337,5 @@ def docfile(client: Client, message: Message):
 # Start the bot
 print("Bot Starting")
 app.run()
+
 
